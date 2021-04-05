@@ -11,6 +11,7 @@
 #include "sudoku.h"
 #define PTHREAD_NUM 4 //线程数目为4
 char puzzle[tasks][128];//存储数独
+char answer[tasks][128];//存储答案
 int total = 0;
 int fin=0;//当前数独的序号
 bool finish=false;//是否解决
@@ -36,7 +37,25 @@ int getWorkID()
 
 void *Run(void *args)
 {
-
+    bool (*solve)(int)=solve_sudoku_basic;//使用basic算法
+    while (!finish)
+    {
+        int id=getWorkID();
+        if (id==-1)
+            break;
+        input(puzzle[id]);
+        if (solve(0))
+        {
+            if (!solved())
+                assert(0);
+            for (int i=0;i<N;i++)//保存结果
+                answer[id][i] = char('0' + board[i]);
+        }
+        else
+        {
+            printf("No: %d,无解\n", id);
+        }
+    }
 }
 
 void Create()//创建线程
