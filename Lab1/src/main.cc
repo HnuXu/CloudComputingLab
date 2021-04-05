@@ -91,6 +91,15 @@ int main(int argc, char* argv[])
   int64_t start = now();//⏲
 
   Create();
+  while (fgets(puzzle[total], sizeof puzzle, fp) != NULL)
+    {
+        if (strlen(puzzle[total]) >= N)
+        {
+            pthread_mutex_lock(&mutex);
+            total++;
+            pthread_mutex_unlock(&mutex);
+        }
+    }
   /*while (fgets(puzzle, sizeof puzzle, fp) != NULL) {
     if (strlen(puzzle) >= N) {
       ++total;
