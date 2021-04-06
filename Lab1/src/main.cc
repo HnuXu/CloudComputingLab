@@ -93,13 +93,6 @@ int main(int argc, char* argv[])
 
   FILE* fp = fopen(argv[1], "r");
   bool (*solve)(int) = solve_sudoku_basic;
-  if (argv[2] != NULL)
-    if (argv[2][0] == 'a')
-      solve = solve_sudoku_min_arity;
-    else if (argv[2][0] == 'c')
-      solve = solve_sudoku_min_arity_cache;
-    else if (argv[2][0] == 'd')
-      solve = solve_sudoku_dancing_links;
   int64_t start = now();//⏲
 
   Create();
