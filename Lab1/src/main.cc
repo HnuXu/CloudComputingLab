@@ -67,6 +67,18 @@ void Create()//创建线程
         }
     }
 }
+void End()
+{
+    for (int i = 0; i < PTHREAD_NUM; i++)
+        pthread_join(pt[i], NULL);//pthread_join用来等待一个线程的结束
+}
+
+void display()
+{
+    for(int i=0;i<total; i++)
+        printf("%s\n",answer[i]);
+}
+
 
 int64_t now()//⏲
 {
@@ -100,24 +112,9 @@ int main(int argc, char* argv[])
             pthread_mutex_unlock(&mutex);
         }
     }
-  /*while (fgets(puzzle, sizeof puzzle, fp) != NULL) {
-    if (strlen(puzzle) >= N) {
-      ++total;
-      input(puzzle);
-      init_cache();
-      //if (solve_sudoku_min_arity_cache(0)) {
-      //if (solve_sudoku_min_arity(0))
-      //if (solve_sudoku_basic(0)) {
-      if (solve(0)) {
-        ++total_solved;
-        if (!solved())
-          assert(0);
-      }
-      else {
-        printf("No: %s", puzzle);
-      }
-    }
-  }*/
+  End();//结束线程
+  //输出答案
+  display();
   int64_t end = now();
   double sec = (end-start)/1000000.0;
   printf("时间:\n");
