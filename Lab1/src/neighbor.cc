@@ -75,13 +75,14 @@ static void print_neighbors(const bool adjacent[ROW][COL], int row, int col, int
   }
 }
 
-bool solved()
+bool solved(int board[N])
 {
+  int (*chess)[COL] = (int (*)[COL])board;
   for (int row = 0; row < ROW; ++row) {
     // check row
     int occurs[10] = { 0 };
     for (int col = 0; col < COL; ++col) {
-      int val = chess[row][col];
+      int val = chess[row][col];//printf("%d ",val);
       assert(1 <= val && val <= NUM);
       ++occurs[val];
     }
