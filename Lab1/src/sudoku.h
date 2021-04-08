@@ -16,10 +16,10 @@ void init_neighbors();
 int input(const char in[N], int board[N], int spaces[N]);
 void init_cache();
 
-bool available(int guess, int cell);
+bool available(int guess, int cell,int board[N]);
 
 bool solve_sudoku_basic(int which_space,int board[N],int nspaces,int spaces[N]);
-bool solve_sudoku_min_arity(int which_space);
+bool solve_sudoku_min_arity(int which_space,int *board,int nspaces,int *spaces);
 bool solve_sudoku_min_arity_cache(int which_space);
 bool solve_sudoku_dancing_links(int unused);
 
