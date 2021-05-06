@@ -49,6 +49,56 @@ int main(int argc, char *argv[])
 	printf("Binding server to port %d\n", port);
 	printf("Binding server to ip %s\n",server_addr.sin_addr.s_addr);
 	
+    int opt;
+    int digit_optind = 0;
+    int option_index = 0;
+    char *string = "a:b:d";
+    static struct option long_options[] =
+    {
+        {"ip",required_argument,NULL,'r'},
+		{"port",required_argument,NULL,'r'},
+		{NULL,0,NULL,0},
+	};
+	int i=1;
+	while((opt =getopt_long_only(argc,argv,string,long_options,&option_index))!= -1)
+	{  
+		if(strcmp(argv[i],"--port")==0)
+		{
+			port=atoi(optarg);
+			server_addr.sin_port = htons(port);
+		}
+		printf("opt = %c\t\t",opt);
+		printf("optarg = %s\t\t",optarg);
+		printf("argv[i] =%s\t\t",argv[i]);
+		if(i==1)
+		{
+			i=optind;
+		}
+		printf("option_index = %d\n", option_index);
+	}
+
+	//绑定
+	err_log = bind(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr));
+	if(err_log != 0)
+	{
+		perror("bind");
+		close(sockfd);		
+		exit(-1);
+	}
+	
+	//监听，套接字变被动
+	err_log = listen(sockfd, 10);
+	if( err_log != 0)
+	{
+		perror("listen");
+		close(sockfd);		
+		exit(-1);
+	}
+	
+	printf("Waiting client...\n");
+
+
+
 	close(sockfd);
 	return 0;
 }
