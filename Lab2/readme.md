@@ -1,19 +1,19 @@
 Lab2文件夹包括：
 
-/src/index.html  get请求的html文件
+1.  /src/index.html  get请求的html文件
 
-main.cc  负责创建tcp连接和多个线程
+2.  main.cc  负责创建tcp连接和多个线程
 
-function.cc  负责处理不同的http请求
+3.  function.cc  负责处理不同的http请求
 
-Makefile  将main.cc和function.cc编译生成一个可执行文件httpserver
+4.  Makefile  将main.cc和function.cc编译生成一个可执行文件httpserver
 
-client.c  测试使用的客户端程序
+5.  client.c  测试使用的客户端程序
 
-性能分析报告pdf文档
+6.  性能分析报告pdf文档
 
 
-
+------------------------------------------------
 
 
 
@@ -21,7 +21,7 @@ client.c  测试使用的客户端程序
 
 使用
 
-./httpserver
+    ./httpserver
 
 运行服务器
 
