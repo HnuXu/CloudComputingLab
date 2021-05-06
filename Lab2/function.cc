@@ -17,7 +17,6 @@
 #include <getopt.h>
 using namespace std;
 
-
 void error_func(string method,string url,int sockfd)
 {//处理错误请求的函数
 	string entity;
@@ -101,4 +100,83 @@ void post_func(string name,string id,int sockfd)//POST请求处理
 	char send_buf[1024];
 	sprintf(send_buf,"%s",message.c_str());
 	write(sockfd,send_buf,strlen(send_buf));
+}
+
+void function(char* recv_buf,int connfd)
+{
+	string buffer;
+	bool flag;
+	flag=true;//持久连接标志
+	buffer=string(recv_buf);
+	//处理http请求报文
+	while(buffer.find("HTTP/1.1")!=string::npos)//判断buffer中有没有完整报文
+    {
+		int message_end=0;//请求除主体外报文尾部         
+		if((message_end=buffer.find("\r\n\r\n"))!=-1)//判断是否有请求体
+		{
+			string request="";//请求报文
+			message_end+=4;
+			request=buffer.substr(0,message_end);
+			int message_begin=request.find("Content-Length");
+			int entity_pos=request.length();//实体主体起始位置
+			if(message_begin!=-1)//存在请求体
+			{
+				string num;
+				message_begin+=15;
+				while(request[message_begin]!='\r')
+				{
+					num+=request[message_begin++];
+				}
+				int entity_len=atoi(num.c_str());
+				if((buffer.length()-request.length())>=entity_len)//有主体
+				{
+					request+=buffer.substr(request.length(),entity_len);
+					message_end+=entity_len;
+				}
+				else continue;
+			}
+			buffer=buffer[message_end];//得到完整请求报文
+			string method,url;
+			message_end=0;
+			while(request[message_end]!=' ')
+			{
+				method+=request[message_end++];
+			}
+			if(method!="GET"&&method!="POST")
+			{
+				error_func(method,url,connfd);
+				continue;
+			}
+			++message_end;
+			while(request[message_end]!=' ')
+			{
+				url+=request[message_end++];
+			}
+			++message_end;//提取url
+			if(method=="GET")
+			{
+				get_func(method,url,connfd);
+			}
+			else if(method=="POST")
+			{                                
+				if(url!="/Post_show")
+				{
+					error_func(method,url,connfd);
+					continue;
+				}
+				string entity=request.substr(entity_pos,request.length()-entity_pos);
+				int name_pos=entity.find("Name="),id_pos=entity.find("&ID=");
+				printf("Name=%d,id=%d",name_pos,id_pos);
+				if(name_pos==-1||id_pos==-1||id_pos<=name_pos)
+				{
+					error_func(method,url,connfd);
+					continue;
+				}
+				string name,id;                        
+				name=entity.substr(name_pos+5,id_pos-name_pos-5);
+				id=entity.substr(id_pos+4);
+				post_func(name,id,connfd);
+			}
+		}
+	}
 }
