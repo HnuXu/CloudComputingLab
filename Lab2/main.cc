@@ -20,6 +20,33 @@ pthread_mutex_t mutex;
 pthread_mutex_t lock;
 int counter=0;
 
+void function(char* recv_buf,int connfd);
+/*线程函数,处理客户信息，参数为已连接套接字*/
+void *client_process(void *arg)
+{
+	int recv_len = 0;
+	char recv_buf[200000] = "";	// 接收缓冲区
+	int connfd = *(int *)arg; // 传过来的已连接套接字
+	
+	// 解锁，pthread_mutex_lock()唤醒，不阻塞
+	pthread_mutex_unlock(&mutex); 
+	
+	// 接收数据
+	while((recv_len = recv(connfd, recv_buf, sizeof(recv_buf), 0)) > 0)
+	{
+		function(recv_buf,connfd);
+		pthread_mutex_lock(&lock);
+		counter++;
+		pthread_mutex_unlock(&lock);
+		printf("\ncount=%d\n\n",counter);
+	}
+	
+	printf("client closed!\n");
+	close(connfd);//关闭已连接套接字
+	
+	return 	NULL;
+}
+
 int main(int argc, char *argv[])
 {
 	int sockfd = 0;	//套接字
@@ -27,6 +54,7 @@ int main(int argc, char *argv[])
 	int err_log = 0;
 	struct sockaddr_in server_addr;	//服务器地址结构体
 	unsigned short port = 8888; //监听端口
+
 
 	pthread_t pt;
 	
@@ -48,13 +76,12 @@ int main(int argc, char *argv[])
 
 	printf("Binding server to port %d\n", port);
 	printf("Binding server to ip %s\n",server_addr.sin_addr.s_addr);
-	
     int opt;
     int digit_optind = 0;
     int option_index = 0;
     char *string = "a:b:d";
     static struct option long_options[] =
-    {
+    {  	
         {"ip",required_argument,NULL,'r'},
 		{"port",required_argument,NULL,'r'},
 		{NULL,0,NULL,0},
@@ -96,9 +123,37 @@ int main(int argc, char *argv[])
 	}
 	
 	printf("Waiting client...\n");
-
-
-
+	
+	while(1)
+	{
+		char client_ip[INET_ADDRSTRLEN] = "";//保存客户端IP地址
+		struct sockaddr_in client_addr;//保存客户端地址
+		socklen_t cliaddr_len = sizeof(client_addr);//初始化
+		
+		pthread_mutex_lock(&mutex);	//上锁，在没有解锁之前，pthread_mutex_lock()会阻塞
+		
+		//获得一个已经建立的连接	
+		connfd = accept(sockfd, (struct sockaddr*)&client_addr, &cliaddr_len);   							
+		if(connfd < 0)
+		{
+			perror("accept this time");
+			continue;
+		}
+		
+		//打印客户端的 ip 和端口
+		inet_ntop(AF_INET, &client_addr.sin_addr, client_ip, INET_ADDRSTRLEN);//将数值格式转化为点分十进制的ip地址格式
+		printf("\n",client_ip);
+        //返回值：若成功则为指向结构的指针，若出错则为NULL
+		printf("----------------------------------------------\n");
+		printf("client ip=%s,port=%d\n", client_ip,ntohs(client_addr.sin_port));
+		
+		if(connfd > 0)
+		{
+			pthread_create(&pt, NULL, client_process, &connfd);//创建线程
+			pthread_detach(pt); //线程分离，结束时自动回收资源
+		}
+	}
+	
 	close(sockfd);
 	return 0;
 }
