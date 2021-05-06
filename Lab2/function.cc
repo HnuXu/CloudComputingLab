@@ -87,3 +87,18 @@ void get_func(string method,string url,int sockfd)//GET请求处理
 		error_func(method,url,sockfd);
 	}
 }
+
+void post_func(string name,string id,int sockfd)//POST请求处理
+{
+	string entity="<html><title>POST Method</title><body bgcolor=ffffff>\nYour Name: "+name+"\nID: "+id+"\n<hr><em>Http Web server</em>\n</body></html>\n";
+	int entity_len=entity.length();
+	stringstream ss;
+	ss<<entity_len;
+	string str;
+	ss>>str;
+	string tmp="HTTP/1.1 200 OK\r\nContent-type: text/html\r\nContent-Length: "+str+"\r\n\r\n";
+	string message=tmp+entity;
+	char send_buf[1024];
+	sprintf(send_buf,"%s",message.c_str());
+	write(sockfd,send_buf,strlen(send_buf));
+}
