@@ -9,7 +9,7 @@ ip=[]
 port=[]
 conf=[]
 
-def R_Conf1(argv,ROLE=0,par_num=0):
+def R_Conf(argv,ROLE=0,par_num=0):
     conf_file_name=argv[2]
     for line in open(conf_file_name):
         line=line.strip('\n')
@@ -30,35 +30,6 @@ def R_Conf1(argv,ROLE=0,par_num=0):
             ip_port=ip_port_arr[1]. split(':')
             ip.append(ip_port[0])
             port.append(ip_port[1])
-    return ROLE,par_num##ROLE和参与者数量##
-
-def R_Conf(argv,ROLE=0,par_num=0):
-    conf_file_name=argv[2]
-    for line in open(conf_file_name):
-        line=line.strip('\n')
-        conf.append(line)
-    role=conf[0].split(' ')
-    #print role
-    if role[1]=="participant":
-        ROLE=0 
-        ip_port_arr=conf[2].split(' ')
-        #print ip_port_arr
-        ip_port=ip_port_arr[1].split(':')
-        #print ip_port
-        ip.append(ip_port[0])
-        port.append(ip_port[1])
-    elif role[1]=="coordinator":
-        par_num=len(conf)-2
-        ROLE=1
-        #print par_num#
-        for x in range (par_num) :
-            ip_port_arr=conf[x+1].split(' ')
-            #print ip_port_arr
-            ip_port=ip_port_arr[1]. split(':')
-            #print ip_port
-            ip.append(ip_port[0])
-            port.append(ip_port[1])
-    #print ip,port
     return ROLE,par_num##ROLE和参与者数量##
 
 ROLE,par_num=R_Conf(sys.argv,0,0)
@@ -92,7 +63,6 @@ if ROLE==0:
                 else:
                     i+=1
                     continue
-	    print z
             s.sendto(str(z).encode('utf-8'),srcip)
     s.close
 
@@ -114,14 +84,16 @@ elif ROLE==1:
         else:
             para=message.decode('utf-8').split("\\r\\n")
             if para[2].upper()=='SET':
-		str_command=para[2]+para[4]+para[6]
+		str_command=para[2]+" "+para[4]+" "+para[6]
 		for x in range(par_num):
 		    s_connect_participant.sendto(str_command,(ip[x+1],int(port[x+1])))
                 s.sendto('+OK\\r\\n'.encode('utf-8'),srcip)
             # contact participants
             if para[2].upper() == "GET":
+		str_command=para[2]+" "+para[4]
 		for x in range(par_num):
-                    only_get_once =message.decode('utf-8') +" "+ str(x)
+                    #only_get_once =message.decode('utf-8') +" "+ str(x)
+		    only_get_once=str_command+" "+ str(x)
                     s_connect_participant.sendto(only_get_once.encode('utf-8'),(ip[x + 1],int(port[x + 1])))
                    ### p('[->]',thread_id, only_get_once +" "+ ip[x + 1] +":"+ port[x + 1])
                     if x==0:    #暂定将第1个参与者发回的信息发送给client
@@ -133,9 +105,15 @@ elif ROLE==1:
                             response_code+='$'+str(len(x)) + '\\r\\n' + x + '\\r\\n'
                         s.sendto(response_code.encode('utf-8'), srcip)   #发回给client
                         ###p('[->]',thread_id, response_code + " "+ srcip[0] + ":"+ srcip[1] )
-	    if para[2].upper()=="DEL":    
+	    if para[2].upper()=="DEL":
+		str_num=para[0].strip('*')#去掉头部的*
+    		num_num=int(str_num)
+		str_command=para[2]
+		for x in range(num_num-1):
+		    str_command+=" "+para[4+2*x]
                 for x in range(par_num):  
-                    del_mess=message.decode('utf-8') +" "+ str(x)
+                    #del_mess=message.decode('utf-8') +" "+ str(x)
+		    del_mess=str_command +" "+ str(x)
 		    s_connect_participant.sendto(del_mess.encode('utf-8'),(ip[x + 1],int(port[x + 1])))
 		    if(x==0):
                         get_num = s_connect_participant.recv(1024).decode('utf-8')
