@@ -100,7 +100,7 @@ SET c d
 ![avatar](https://github.com/HnuXu/test/blob/main/c1.png)
 ![avatar](https://github.com/HnuXu/test/blob/main/c2.png)
 
-杀死并重启协调器进程，GET c
+杀死并重启协调器进程，GET a
 
 ![avatar](https://github.com/HnuXu/test/blob/main/c3.png)
 ![avatar](https://github.com/HnuXu/test/blob/main/c4.png)
