@@ -11,7 +11,6 @@ while True :
         s.sendto(message.encode('utf-8'),('127.0.0.1', 8001))
         # State2:Get response  将客户端输入的命令转发到协调者
         resp = s.recv(1024)
-        print(resp)
         if len(resp) == 0:    #未等到协调者， 重新等待
             continue
         else:
