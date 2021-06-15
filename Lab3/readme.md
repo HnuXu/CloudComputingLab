@@ -65,9 +65,47 @@ participant：
 
 在客户端窗口输入指令，可以看到，SET、GET和DEL都做出了正确的反馈：
 
+**set指令测试：**
 
+SET a b
 
-即使重新启动协调者，也不影响参与者的结果：
+![avatar](https://github.com/HnuXu/test/blob/main/set1.png)
+![avatar](https://github.com/HnuXu/test/blob/main/set2.png)
 
+**get指令测试：**
 
-在运行过程中，kv-store采用2pc协议：协调者受到指令后先发送“Are u prepared”的命令询问参与者，都收到“Yes”回复后
+GET a
+
+![avatar](https://github.com/HnuXu/test/blob/main/get1.png)
+![avatar](https://github.com/HnuXu/test/blob/main/get2.png)
+
+**del指令测试：**
+
+删除一个值：DEL a
+
+![avatar](https://github.com/HnuXu/test/blob/main/del1.png)
+![avatar](https://github.com/HnuXu/test/blob/main/del2.png)
+
+删除多个值：DEL a c
+
+![avatar](https://github.com/HnuXu/test/blob/main/del3.png)
+![avatar](https://github.com/HnuXu/test/blob/main/del4.png)
+
+**重新启动协调者测试：**
+
+SET a b 
+
+SET c d
+
+![avatar](https://github.com/HnuXu/test/blob/main/c1.png)
+![avatar](https://github.com/HnuXu/test/blob/main/c2.png)
+
+杀死并重启协调器进程，GET c
+
+![avatar](https://github.com/HnuXu/test/blob/main/c3.png)
+![avatar](https://github.com/HnuXu/test/blob/main/c4.png)
+![avatar](https://github.com/HnuXu/test/blob/main/c5.png)
+
+<br/>
+
+在运行过程中，kv-store采用2pc协议：协调者受到指令后先发送“Are u prepared”的命令询问参与者，都收到“Yes”回复后再将指令传送给参与者执行。
